@@ -35,8 +35,8 @@
 #' poolCSN <- xrayDBconnect("CSN", "../config/config_test.yml")
 #' # Perform some database operations with the connection.
 #' # Once complete, close the pool connection.
-#' poolClose(poolIMP)
-#' poolClose(poolCSN)
+#' pool::poolClose(poolIMP)
+#' pool::poolClose(poolCSN)
 #' 
 #' @export
 #' 
@@ -56,7 +56,8 @@ xrayDBconnect <- function(network=c("IMPROVE","CSN"),
                 drv=odbc::odbc(),
                 Driver=db$driver,
                 Server=db$server,
-                Port=db$port
+                Port=db$port,
+                Database="CSN_1.0"
             )
         } else {
             pool <- pool::dbPool(
@@ -65,7 +66,7 @@ xrayDBconnect <- function(network=c("IMPROVE","CSN"),
                 Server=db$server,
                 Port=db$port,
                 uid=db$uid,
-                Database="CSN_1.0",  # Adding explicit db connection until Trinidad resolves connection issue
+                Database="CSN_1.0",
                 pwd=db$pwd,
                 TDS_Version=db$TDS_Version,
                 UseNTLMv2=db$UseNTLMv2
@@ -80,7 +81,8 @@ xrayDBconnect <- function(network=c("IMPROVE","CSN"),
                 drv=odbc::odbc(),
                 Driver=db$driver,
                 Server=db$server,
-                Port=db$port
+                Port=db$port,
+                Database="Improve_2.1"
             )
         } else {
             pool <- pool::dbPool(
@@ -88,6 +90,7 @@ xrayDBconnect <- function(network=c("IMPROVE","CSN"),
                 Driver=db$driver,
                 Server=db$server,
                 Port=db$port,
+                Database="Improve_2.1",
                 uid=db$uid,
                 pwd=db$pwd,
                 TDS_Version=db$TDS_Version,
