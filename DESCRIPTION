@@ -1,10 +1,10 @@
-Package: CNLxray
+Package: AQRCxray
 Title: Utility Functions for Working with XRF Data
 Version: 0.0.0.9000
 Authors@R: person("Jason", "Giacomo", email = "jagiacomo@ucdavis.edu",
                   role = c("aut", "cre"))
 Description: This package provides utility functions and ggplot2 plotting themes.
-    These are useful for working with XRF Data in the Crocker Nuclear Lab at UC 
+    These are useful for working with XRF Data in the Air Quality Research Center at UC 
     Davis. The package was put together to organize and avoid multiple copies of
     functions which were being used in multiple different analyses. Also, a
     plotting theme, with consitent colors, was put together to make plotting of
