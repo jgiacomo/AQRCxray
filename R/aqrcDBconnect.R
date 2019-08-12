@@ -41,7 +41,7 @@
 #' @export
 #' 
 
-xrayDBconnect <- function(network=c("IMPROVE","CSN"),
+aqrcDBconnect <- function(network=c("IMPROVE","CSN"),
                           server="production",
                           config_file="../config/config.yml"){
     
