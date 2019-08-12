@@ -14,7 +14,9 @@ Depends: R (>= 3.4.2)
 Imports:
     dplyr,
     tidyr,
-    readxl
+    readxl,
+    pool,
+    odbc
 License: None
 Encoding: UTF-8
 LazyData: true
