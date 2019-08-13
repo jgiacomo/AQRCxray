@@ -106,3 +106,29 @@ aqrcDBconnect <- function(network=c("IMPROVE","CSN"),
     return(pool)
     
 }
+
+#' Function to disconnect from the database and cleanup the connection
+#' 
+#' This function will disconnect from any pool connection and remove the 
+#' connection object from the R environment.
+#' 
+#' @param poolConn pool object which represents an active connection.
+#'   
+#' @return Nothing.
+#'   
+#' @details This function will disconnect a database connection via the
+#'   \code{pool} package. After disconnecting it will remove the connection
+#'   object from the R environment.
+#'   
+#' @examples
+#' # poolIMP is a database connection
+#' aqrcDBdisconnect(poolIMP)
+#' # the connection is closed and the object, poolIMP, is removed.
+#' 
+#' @export
+#' 
+
+aqrcDBdisconnect <- function(poolConn) {
+    poolClose(poolConn)
+    rm(list=deparse(substitute(poolConn)), pos=".GlobalEnv")
+}
