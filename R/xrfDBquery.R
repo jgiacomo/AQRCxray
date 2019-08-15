@@ -1,0 +1,248 @@
+#' Function to get XRF specific data from the database.
+#' 
+#' This function will perform a query on the database to get XRF analysis 
+#' results. The query can be filtered using the arguments of the function to 
+#' reduce the size of the data obtained from the database. Further filtering of 
+#' the returned data frame can be done in R. The function uses an open database 
+#' connection to perform a query and stores the result of the query in a data 
+#' frame.
+#' 
+#' @param conn connection object linked to the IMPROVE or CSN database
+#'   
+#' @param network character string for the network, \code{IMPROVE} or \code{CSN}
+#'   
+#' @param minDate character string of the minimum XRF analysis date (inclusive)
+#'   
+#' @param maxDate character string of the maximum XRF analysis date (inclusive)
+#'   
+#' @param site character string of the site name to query. For IMPROVE a 
+#'   character vector can be used to query multiple sites.
+#'   
+#' @param sampleDate character string in the format \code{YYYY-mm-dd}. This will
+#'   query the database for a filter with the specified sample date. For CSN the
+#'   sample date will be the 'IntendedUseDate'. Supercedes \code{minSampleDate} 
+#'   and \code{maxSampleDate}.
+#'   
+#' @param minSampleDate character string of the minimum sample date to query. 
+#'   For CSN the sample date is the 'IntendedUseDate'. If a sampleDate is 
+#'   entered this argument will be ignored.
+#'   
+#' @param maxSampleDate character string of the maximum sample date to query. 
+#'   For CSN the sample date is the 'IntendedUseDate'. If a sampleDate is 
+#'   entered this argument will be ignored.
+#'   
+#' @param filterId numeric vector of Filter IDs to query.
+#'   
+#' @param barcodeId character vector of barcodes (ContractorFilterAnalysisId in
+#'   the database). This field doesn't exist in the IMPROVE database, so this
+#'   argument will be ignored if the network = IMPROVE.
+#'   
+#' @param trayFileSampleId character vector of TrayFileSampleId's to query.
+#'   
+#' @param includeQC character string. \code{yes} indicates QC samples will be 
+#'   included with network samples in the query. \code{no} will exclude QC 
+#'   samples from the query results. \code{only} will only include QC samples in
+#'   the query results.
+#'   
+#' @param valid boolean. \code{TRUE} will only include valid results in the 
+#'   query results. \code{FALSE} will return both valid and invalid results.
+#'   
+#' @param elements character vector of elements to include in the results (e.g. 
+#'   c("Al", "Si", "Ca", "Fe")). \code{all} will include all elements in the 
+#'   results.
+#'   
+#' @return data frame of the query results from the database.
+#'   
+#' @details Use of this function requires some knowledge of the database 
+#'   structure for the AQRC databases. The queries produced by this function are
+#'   specfically for obtaining results from the XRF instruments (i.e. no HIPS, 
+#'   qCarbon, or ions data can be queried using this function). The most common 
+#'   search criteria were included in the list of function arguments, however, 
+#'   if further filtering of the database results is required, this can easily 
+#'   be done in the R environment with the returned data frame. The elements 
+#'   over which you can filter is created by the available elements using the 
+#'   other filtering criteria in your search, therefore, it could change based 
+#'   on the dates you are searching over.
+#'   
+#' @examples 
+#' # A query of the crustal element results from samples analyzed in the month
+#' # of May, 2019 from the IMPROVE database.
+#' df <- xrfDBquery(poolConn, network="IMPROVE", minDate="2019-05-01",
+#'                  maxDate="2019-05-31", elements=c("Al","Si","Ca","Fe"))
+#'                  
+#' # Another query of all valid sample results (no QC samples) sampled in
+#' # September, 2017 in the CSN network.
+#' df <- xrfDBquery(poolConn, network="CSN", minSampleDate="2017-09-01",
+#'                  maxSampleDate="2017-09-30", includeQC="no")
+#'                  
+#' # To include both valid and invalid results add \code{valid=FALSE}
+#' df <- xrfDBquery(poolConn, network="CSN", minSampleDate="2017-09-01",
+#'                  maxSampleDate="2017-09-30", includeQC="no", valid=FALSE)
+#'                  
+#' # For the CSN network specific filter barcodes can be searched.
+#' df <- xrfDBquery(poolConn, network="CSN",
+#'                  barcodeId=c("F164145","F162513","F163396"))
+#'                  
+#' # Both networks can be searched by the TrayFileSampleId.
+#' df <- xrfDBquery(poolConn, network="IMPROVE",
+#'                  trayFileSampleId=c("BIBE1", "SIME1"),
+#'                  sampleDate="2018-11-19")
+#'                  
+#' # Additional filtering can be done via normal R procedures. For instance, to
+#' # get the IMPROVE results for May, 2018 from just Froya add filtering after
+#' # the function call.
+#' df <- xrfDBquery(poolConn, network="IMPROVE", minSampleDate="2018-05-01",
+#'                  maxSampleDate="2018-05-31", includeQC="no")
+#' froya_results <- df[df$DeviceName=="Froya",]
+#' 
+#' @export
+#' 
+
+xrfDBquery <- function(conn,
+                       network=c("IMPROVE","CSN"),
+                       minDate = "2016-01-01",
+                       maxDate = as.character(Sys.Date()),
+                       site = NULL, sampleDate = NULL,
+                       minSampleDate = NULL,
+                       maxSampleDate = NULL,
+                       filterId = NULL, barcodeId = NULL,
+                       trayFileSampleId = NULL,
+                       includeQC = c("yes","no","only"),
+                       valid = TRUE,
+                       elements = "all") {
+    
+    # Restrict inputs
+    network <- match.arg(network)
+    includeQC <- match.arg(includeQC)
+    
+    # Setup the links to the database tables
+    dc <- tbl(conn,in_schema("xrf","DeviceCounts"))
+    sa <- tbl(conn,in_schema("xrf","SampleAnalysis")) %>%
+        rename(SampleAnalysisId = Id)
+    d <- tbl(conn,in_schema("xrf","Device")) %>%
+        rename(DeviceId = Id, DeviceName = Name)
+    f <- tbl(conn,in_schema("filter","Filters")) %>%
+        rename(FilterId = Id)
+    sam <- tbl(conn,in_schema("sampler","Samplers")) %>%
+        rename(SamplerId = Id)
+    
+    # Network specific tables and joins
+    if(network=="IMPROVE"){
+        mod <- tbl(conn,in_schema("sampler","Modules")) %>%
+            rename(SamplerModuleId = Id)
+        
+        df <- dc %>%
+            left_join(sa,by="SampleAnalysisId") %>%
+            left_join(d,by="DeviceId") %>%
+            left_join(f,by="FilterId") %>%
+            left_join(mod,by="SamplerModuleId") %>%
+            left_join(sam,by="SamplerId") %>%
+            filter(XRFDate >= minDate, XRFDate <= maxDate)
+    }
+    
+    if(network=="CSN"){
+        site <- tbl(conn,in_schema("sampler","Sites")) %>%
+            rename(SiteId = Id)
+        
+        df <- dc %>%
+            left_join(sa,by="SampleAnalysisId") %>%
+            left_join(d,by="DeviceId") %>%
+            left_join(f,by="FilterId") %>%
+            left_join(sam,by="SamplerId") %>%
+            left_join(site,by="SiteId") %>%
+            filter(XRFDate >= minDate, XRFDate <= maxDate)
+    }
+    
+    # Restrict element input to just those in the data
+    elemList <- df %>% select(Parameter) %>% collect() %>% unique() %>% pull()
+    elements <- match.arg(elements,choices=c("all",elemList))
+    
+    # For CSN, rename the IntendedUseDate to SampleDate
+    if(tolower(network)=="csn") {
+        df <- df %>% rename(SampleDate = IntendedUseDate)
+    }
+    
+    ### Filter the query based on user provided parameter values
+    
+    # Filter by site
+    if(!is.null(site)) {
+        df <- df %>% filter(Site=site)
+    }
+    
+    # Filter by specific SampleDate
+    if(!is.null(sampleDate)) {
+        testDate <- tryCatch(as.Date(sampleDate),
+                             error=function(e) {
+                                 paste("The sample date entered was incorrect.",
+                                       "Please enter a date in the format,",
+                                       "YYYY-MM-DD (e.g. 2019-03-14)")
+                             })
+        # Sanity check the date
+        if(as.Date(sampleDate)<'1975-01-01' | as.Date(sampleDate)>Sys.Date()){
+            stop(paste("The sample date entered isn't a likely date.",
+                       "Please enter a true sampling date."))
+        }
+        
+        df <- df %>% filter(SampleDate == as.Date(sampleDate))
+    }
+    
+    # Filter by SampleDate range
+    if(is.null(sampleDate) & !is.null(minSampleDate)) {
+        if(is.null(maxSampleDate)) {
+            maxSampleDate = Sys.Date()
+        } else {
+            testDate <- tryCatch(as.Date(maxSampleDate),
+                                 error=function(e){
+                                     paste("The maximum sample date entered is",
+                                           "is incorrect. Please enter a date",
+                                           "in the format YYYY-MM-DD")
+                                 })
+        }
+        testDate <- tryCatch(as.Date(minSampleDate),
+                             error=function(e) {
+                                 paste("The minimum sample date entered",
+                                       "is incorrect. Please enter a date in",
+                                       "the format YYYY-MM-DD")
+                             })
+        
+        df <- df %>% filter(SampleDate >= minSampleDate,
+                            SampleDate <= maxSampleDate)
+    }
+    
+    # Filter by filter ID
+    if(!is.null(filterId)) {
+        df <- df %>% filter(FilterId %in% filterId)
+    }
+    
+    # Filter by Barcode ID for CSN only
+    if(tolower(network)=="csn" & !is.null(barcodeId)) {
+        df <- df %>% filter(ContractorFilterAnalysisId %in% barcodeId)
+    }
+    
+    # Filter by TrayFileSampleId
+    if(!is.null(trayFileSampleId)) {
+        df <- df %>% filter(TrayFileSampleId %in% trayFileSampleId)
+    }
+    
+    # Filter by QC samples
+    if(includeQC=="no") {
+        df <- df %>% filter(!(TrayFileSampleId %like% 'QC%'))
+    } else if(includeQC=="only") {
+        df <- df %>% filter(TrayFileSampleId %like% 'QC%')
+    }
+    
+    # Filter only valid results
+    if(valid) {
+        df <- df %>% filter(AnalysisQcCode == 1)
+    }
+    
+    # Filter results by element (Parameter)
+    if(elements != "all") {
+        df <- df %>% filter(Parameter %in% elements)
+    }
+    
+    # Collect results so they are not lazy evaluated.
+    df <- df %>% collect()
+    
+    return(df)
+}

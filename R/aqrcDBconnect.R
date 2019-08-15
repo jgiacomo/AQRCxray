@@ -128,7 +128,12 @@ aqrcDBconnect <- function(network=c("IMPROVE","CSN"),
 #' @export
 #' 
 
-aqrcDBdisconnect <- function(poolConn) {
+aqrcDBdisconnect <- function(poolConn, pos=NULL) {
     poolClose(poolConn)
-    rm(list=deparse(substitute(poolConn)), pos=".GlobalEnv")
+    if(is.null(pos)){
+        rm(list=deparse(substitute(poolConn)), pos=".GlobalEnv")
+    } else {
+        rm(list=deparse(substitute(poolConn)), pos=pos)
+    }
+    
 }
