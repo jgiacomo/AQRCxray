@@ -1,6 +1,7 @@
 context("Connects to database")
 
 suppressWarnings({
+    library(DBI)
     library(dbplyr)
     library(pool)
 })

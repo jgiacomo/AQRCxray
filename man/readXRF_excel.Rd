@@ -18,5 +18,8 @@ This function will return a tidy data frame from Panalytical E5 XRF
 instrument results which are stored in an Excel worksheet.
 }
 \examples{
-readXRF_excel()
+\dontrun{
+readXRF_excel("pathTo/excel/file","Odin")
+}
+
 }

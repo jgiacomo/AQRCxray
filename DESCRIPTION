@@ -3,6 +3,7 @@ Title: Utility Functions for Working with XRF Data
 Version: 0.0.1
 Authors@R: person("Jason", "Giacomo", email = "jagiacomo@ucdavis.edu",
                   role = c("aut", "cre"))
+Maintainer: Jason Giacomo <jagiacomo@ucdavis.edu>
 Description: This package provides utility functions and ggplot2 plotting themes.
     These are useful for working with XRF Data in the Air Quality Research Center at UC 
     Davis. The package was put together to organize and avoid multiple copies of
@@ -10,16 +11,19 @@ Description: This package provides utility functions and ggplot2 plotting themes
     plotting theme, with consistent colors, was put together to make plotting of
     XRF data more consistent. These functions and plotting themes will hopefully
     be helpful in reducing code copying and in report consitency.
-Depends: R (>= 3.4.2)
+Depends:
+    R (>= 3.4),
+    dplyr
 Imports:
-    dplyr,
-    tidyr,
-    readxl,
-    pool,
+    config,
+    DBI,
+    dbplyr,
     odbc,
-    dbplyr
-License: None
+    pool,
+    readxl,
+    tidyr
+Suggests: testthat
+License: MIT
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.1
-Suggests: testthat

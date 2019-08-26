@@ -2,17 +2,17 @@
 % Please edit documentation in R/aqrcDBconnect.R
 \name{aqrcDBconnect}
 \alias{aqrcDBconnect}
-\title{Function to connect to the database}
+\title{Function to connect to the AQRC databases}
 \usage{
 aqrcDBconnect(network = c("IMPROVE", "CSN"), server = "production",
   config_file = "../config/config.yml")
 }
 \arguments{
-\item{network}{Character string of the network to connect to (IMPROVE or 
+\item{network}{Character string of the network to connect to (IMPROVE or
 CSN).}
 
-\item{server}{Character string of the server to connect to. Typically 
-something like "production", "development", and "test" (default is 
+\item{server}{Character string of the server to connect to. Typically
+something like "production", "development", and "test" (default is
 "production").}
 
 \item{config_file}{Character string of the relative path to the config file
@@ -22,31 +22,37 @@ something like "production", "development", and "test" (default is
 A pool connection to the database defined by the parameters.
 }
 \description{
-This function will connect to the AQRC databases (IMPROVE or CSN) and pull 
+This function will connect to the AQRC databases (IMPROVE or CSN) and pull
 data from multiple tables that are useful for XRF data analysis. The database
-connection is done with the help of a config file which is stored in the 
-../config/config.yml file. See the documentation for the \code{config} 
+connection is done with the help of a config file which is stored in the
+../config/config.yml file. See the documentation for the \code{config}
 package for details.
 }
 \details{
-This function will open a database connection via the \code{pool} 
-  package. It uses the \code{config} package to place the connection 
+This function will open a database connection via the \code{pool}
+  package. It uses the \code{config} package to place the connection
   configuration into a separate file that can be read in to make it easier to
   distribute between desktop sessions and deployed server sessions (which may
-  have different connection parameters). Also, because this is opening pool 
-  connections to the database, it is best practice to ensure these 
-  connections are closed after database operations are finished. Also, while 
-  the database servers are being changed over (a new database server was 
-  installed) the IMPROVE and CSN are on different servers. To connect to CSN 
+  have different connection parameters). Also, because this is opening pool
+  connections to the database, it is best practice to ensure these
+  connections are closed after database operations are finished. Also, while
+  the database servers are being changed over (a new database server was
+  installed) the IMPROVE and CSN are on different servers. To connect to CSN
   database you need to use the \code{config_test.yml} file and to connecto to
-  IMPROVE you need to use the \code{config.yml} file.
+  IMPROVE you need to use the \code{config.yml} file. For details about the
+  \code{config} package see the website at
+  \href{https://github.com/rstudio/config}{https://github.com/rstudio/config}.
+  And for details of the \code{pool} package see its website at
+  \href{https://github.com/rstudio/pool}{https://github.com/rstudio/pool}.
 }
 \examples{
-poolIMP <- xrayDBconnect("IMPROVE", "../config/config.yml")
-poolCSN <- xrayDBconnect("CSN", "../config/config_test.yml")
+\dontrun{
+poolIMP <- aqrcDBconnect("IMPROVE", "../config/config.yml")
+poolCSN <- aqrcDBconnect("CSN", "../config/config_test.yml")
 # Perform some database operations with the connection.
 # Once complete, close the pool connection.
-pool::poolClose(poolIMP)
-pool::poolClose(poolCSN)
+pool::poolClose(poolIMP); rm(poolIMP)
+pool::poolClose(poolCSN); rm(poolCSN)
+}
 
 }

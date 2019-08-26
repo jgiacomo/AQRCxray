@@ -2,18 +2,22 @@
 % Please edit documentation in R/aqrcDBconnect.R
 \name{aqrcDBdisconnect}
 \alias{aqrcDBdisconnect}
-\title{Function to disconnect from the database and cleanup the connection}
+\title{Function to disconnect from any pool connection and cleanup the connection}
 \usage{
 aqrcDBdisconnect(poolConn, pos = NULL)
 }
 \arguments{
 \item{poolConn}{pool object which represents an active connection.}
+
+\item{pos}{inherited from rm(). The numeric position of the environment from
+which to remove the object, or a character string naming the environment
+(parsed with as.environment()).}
 }
 \value{
 Nothing.
 }
 \description{
-This function will disconnect from any pool connection and remove the 
+This function will disconnect from any pool connection and remove the
 connection object from the R environment.
 }
 \details{
@@ -22,8 +26,15 @@ This function will disconnect a database connection via the
   object from the R environment.
 }
 \examples{
+\dontrun{
 # poolIMP is a database connection
 aqrcDBdisconnect(poolIMP)
 # the connection is closed and the object, poolIMP, is removed.
+}
 
+}
+\seealso{
+\code{\link{poolClose}}
+
+\code{\link{rm}}
 }
