@@ -6,21 +6,41 @@ suppressWarnings({
     library(pool)
 })
 
-# Set relative path to config files (working directory for tests is 'testthat')
-imp_config <- file.path("../../../config/config.yml")
-csn_config <- "../../../config/config_test.yml"
-
-test_that("DB connection fails if config file is not provided",{
-    expect_error(aqrcDBconnect("IMPROVE",config_file=NULL))
+test_that("DB connection fails if incorrect network is provided",{
+    expect_error(aqrcDBconnect("IMP","aqrc-sql"))
 })
 
-test_that("DB connection fails if path to config file is bad",{
-    expect_error(aqrcDBconnect("CSN",config_file="bad/path/config.yml"))
+test_that("DB connection fails if incorrect server is provided",{
+    expect_error(aqrcDBconnect("CSN","aqrc-wrong"))
 })
 
-test_that("DB connection creates a pool object", {
-    impDBconn <- aqrcDBconnect("IMPROVE",config_file=imp_config)
-    csnDBconn <- aqrcDBconnect("CSN",config_file=csn_config)
+test_that("DB connection to production creates a pool object", {
+    impDBconn <- aqrcDBconnect("IMPROVE","aqrc-sql")
+    csnDBconn <- aqrcDBconnect("CSN","aqrc-sql")
+    
+    expect_equal(class(impDBconn)[1],"Pool")
+    
+    expect_equal(class(csnDBconn)[1],"Pool")
+    
+    poolClose(impDBconn)
+    poolClose(csnDBconn)
+})
+
+test_that("DB connection to test creates a pool object", {
+    impDBconn <- aqrcDBconnect("IMPROVE","aqrc-sql-test")
+    csnDBconn <- aqrcDBconnect("CSN","aqrc-sql-test")
+    
+    expect_equal(class(impDBconn)[1],"Pool")
+    
+    expect_equal(class(csnDBconn)[1],"Pool")
+    
+    poolClose(impDBconn)
+    poolClose(csnDBconn)
+})
+
+test_that("DB connection to development creates a pool object", {
+    impDBconn <- aqrcDBconnect("IMPROVE","aqrc-sql-appdev")
+    csnDBconn <- aqrcDBconnect("CSN","aqrc-sql-appdev")
     
     expect_equal(class(impDBconn)[1],"Pool")
     
@@ -31,8 +51,8 @@ test_that("DB connection creates a pool object", {
 })
 
 test_that("A connecton to the Microsoft SQL Server is made", {
-    impDBconn <- aqrcDBconnect("IMPROVE",config_file=imp_config)
-    csnDBconn <- aqrcDBconnect("CSN",config_file=csn_config)
+    impDBconn <- aqrcDBconnect("IMPROVE","aqrc-sql")
+    csnDBconn <- aqrcDBconnect("CSN","aqrc-sql")
     
     expect_output(show(impDBconn),'Microsoft SQL Server')
     
@@ -44,8 +64,8 @@ test_that("A connecton to the Microsoft SQL Server is made", {
 
 test_that("A connection to the database is made", {
     testSQL <- sql("SELECT DB_Name() AS DB_Name")
-    impDBconn <- aqrcDBconnect("IMPROVE",config_file=imp_config)
-    csnDBconn <- aqrcDBconnect("CSN",config_file=csn_config)
+    impDBconn <- aqrcDBconnect("IMPROVE","aqrc-sql")
+    csnDBconn <- aqrcDBconnect("CSN","aqrc-sql")
     
     imp <- DBI::dbGetQuery(impDBconn,testSQL)
     csn <- DBI::dbGetQuery(csnDBconn,testSQL)
