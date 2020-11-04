@@ -1,17 +1,15 @@
 #' Function to connect to the AQRC databases
 #'
-#' This function will connect to the AQRC databases (IMPROVE or CSN) and pull
-#' data from multiple tables that are useful for XRF data analysis. The database
-#' connection is done with the help of a config file which is stored in the
-#' ../config/config.yml file. See the documentation for the \code{config}
-#' package for details.
+#' This function will connect to the AQRC databases (IMPROVE or CSN). The
+#' database connection is through a pool object. See the documentation for the
+#' \code{pool} package for details.
 #'
 #' @param network Character string of the network to connect to (IMPROVE or
 #'   CSN).
 #'
 #' @param server Character string of the server to connect to. Typically
-#'   something like "aqrc-sql", "aqrc-sql-test", and "aqrc-sql-appdev"
-#'   (default is the production database server "aqrc-sql").
+#'   something like "aqrc-sql", "aqrc-sql-test", and "aqrc-sql-appdev" (default
+#'   is the production database server "aqrc-sql").
 #'
 #' @return A pool connection to the database defined by the parameters.
 #'
@@ -21,6 +19,8 @@
 #'   operations are finished. For details of the \code{pool} package see its
 #'   website at
 #'   \href{https://github.com/rstudio/pool}{https://github.com/rstudio/pool}.
+#'
+#' @seealso \code{\link{dbPool}}
 #'
 #' @import odbc
 #'
