@@ -47,7 +47,7 @@ aqrcDBconnect <- function(network=c("IMPROVE","CSN"),
         pool <- pool::dbPool(
                 drv=odbc::odbc(),
                 Driver='SQL Server',
-                Server='aqrc-sql',
+                Server=server,
                 Port=1433L,
                 Database="CSN_1.0"
             )
@@ -58,7 +58,7 @@ aqrcDBconnect <- function(network=c("IMPROVE","CSN"),
         pool <- pool::dbPool(
             drv=odbc::odbc(),
             Driver='SQL Server',
-            Server='aqrc-sql',
+            Server=server,
             Port=1433L,
             Database="Improve_2.1"
         )
