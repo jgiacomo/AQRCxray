@@ -71,6 +71,8 @@
 #'   
 #' @importFrom dbplyr in_schema
 #' 
+#' @importFrom bit64 is.integer64
+#' 
 #' @import dplyr
 #' 
 #' @examples
@@ -260,13 +262,9 @@ xrfDBquery <- function(conn,
     # Collect results so they are not lazy evaluated.
     df <- df %>% collect()
     
-    # Convert integer64 class to int
-    is.integer64 <- function(x){
-        class(x)[1]=="integer64"  # subset fixes dual class of POSIXct dates.
-    }
-    
+    # Convert integer64 class to integer
     df_mut <- df %>%
-        dplyr::mutate_if(is.integer64, as.integer)
+        dplyr::mutate_if(bit64::is.integer64, as.integer)
     
     return(df_mut)
 }
