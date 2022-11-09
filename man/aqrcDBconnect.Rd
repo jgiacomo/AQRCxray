@@ -4,8 +4,11 @@
 \alias{aqrcDBconnect}
 \title{Function to connect to the AQRC databases}
 \usage{
-aqrcDBconnect(network = c("IMPROVE", "CSN"), server = "production",
-  config_file = "../config/config.yml")
+aqrcDBconnect(
+  network = c("IMPROVE", "CSN"),
+  server = "production",
+  config_file = "../config/config.yml"
+)
 }
 \arguments{
 \item{network}{Character string of the network to connect to (IMPROVE or

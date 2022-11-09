@@ -4,11 +4,23 @@
 \alias{xrfDBquery}
 \title{Function to get XRF specific data from the database.}
 \usage{
-xrfDBquery(conn, network = c("IMPROVE", "CSN"), minDate = "2016-01-01",
-  maxDate = as.character(Sys.Date()), site = NULL, sampleDate = NULL,
-  minSampleDate = NULL, maxSampleDate = NULL, filterId = NULL,
-  barcodeId = NULL, trayFileSampleId = NULL, includeQC = c("yes",
-  "no", "only"), valid = TRUE, elements = "all", showQuery = FALSE)
+xrfDBquery(
+  conn,
+  network = c("IMPROVE", "CSN"),
+  minDate = "2019-01-01",
+  maxDate = as.character(Sys.Date()),
+  site = NULL,
+  sampleDate = NULL,
+  minSampleDate = NULL,
+  maxSampleDate = NULL,
+  filterId = NULL,
+  barcodeId = NULL,
+  trayFileSampleId = NULL,
+  includeQC = c("yes", "no", "only"),
+  valid = TRUE,
+  elements = "all",
+  showQuery = FALSE
+)
 }
 \arguments{
 \item{conn}{connection object linked to the IMPROVE or CSN database}
@@ -95,7 +107,7 @@ df <- xrfDBquery(poolConn, network="IMPROVE", minDate="2019-05-01",
 df <- xrfDBquery(poolConn, network="CSN", minSampleDate="2017-09-01",
                  maxSampleDate="2017-09-30", includeQC="no")
                  
-# To include both valid and invalid results add \\code{valid=FALSE}
+# To include both valid and invalid results add \code{valid=FALSE}
 df <- xrfDBquery(poolConn, network="CSN", minSampleDate="2017-09-01",
                  maxSampleDate="2017-09-30", includeQC="no", valid=FALSE)
                  

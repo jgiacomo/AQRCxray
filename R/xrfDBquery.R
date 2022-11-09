@@ -111,7 +111,7 @@
 
 xrfDBquery <- function(conn,
                        network=c("IMPROVE","CSN"),
-                       minDate = "2016-01-01",
+                       minDate = "2019-01-01",
                        maxDate = as.character(Sys.Date()),
                        site = NULL,
                        sampleDate = NULL,
@@ -142,7 +142,7 @@ xrfDBquery <- function(conn,
     
     # Network specific tables and joins
     if(network=="IMPROVE"){
-        mod <- tbl(conn,dbplyr::in_schema("sampler","Modules")) %>%
+        mod <- tbl(conn,dbplyr::in_schema("module","Modules")) %>%
             rename(SamplerModuleId = Id)
         
         df <- dc %>%
@@ -260,5 +260,13 @@ xrfDBquery <- function(conn,
     # Collect results so they are not lazy evaluated.
     df <- df %>% collect()
     
-    return(df)
+    # Convert integer64 class to int
+    is.integer64 <- function(x){
+        class(x)[1]=="integer64"  # subset fixes dual class of POSIXct dates.
+    }
+    
+    df_mut <- df %>%
+        dplyr::mutate_if(is.integer64, as.integer)
+    
+    return(df_mut)
 }
